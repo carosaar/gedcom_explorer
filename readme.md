@@ -95,7 +95,7 @@ Beispiel:
 
 ## Lizenz
 
-MIT License
+GNU General Public-Lizenz
 
 ---
 
