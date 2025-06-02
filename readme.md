@@ -16,8 +16,7 @@ Die Anwendung bietet eine benutzerfreundliche grafische Oberfläche (GUI), mit d
 
 ## Screenshot
 
-![alt text](<images/Screenshot 2025-06-02 081628.png>)
-
+![alt text](<images/Screenshot 2025-06-02 184419.png>)
 ## Installation
 
 ### Voraussetzungen
