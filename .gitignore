@@ -1,0 +1,12 @@
+*.csv
+*test*
+/dist
+/build
+*.exe
+*.spec
+*lernen*
+images/Logo_FB-Illingen mit Adresse.png
+images/QR-Code.png
+/Dokumentiertes_pyScript
+/test
+ged_tag.spec
