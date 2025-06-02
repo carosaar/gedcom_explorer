@@ -8,7 +8,8 @@ Das GUI-Modul `ged_explorer.py` stellt eine graphische Benutzeroberfläche zur V
 ![alt text](<images/Screenshot 2025-06-02 081628.png>)
 
 ### Zusammenhang
-Das GUI kommuniziert mit der Logik im Modul `ged_parser.py` (genauer mit der Funktion `gedcom_explorer`) zur eigentlichen Verarbeitung der GEDCOM-Datei und Erzeugung der CSV-Ausgabe. Das GUI ist demnach nur für den Aufbau der Parameter der Funktion `gedcom_explorer`.
+Das GUI kommuniziert mit der Logik im Modul `ged_parser.py` (genauer mit der Funktion `gedcom_explorer`) zur eigentlichen Verarbeitung der GEDCOM-Datei und Erzeugung der CSV-Ausgabe. Das GUI ist demnach nur für den Aufbau der Parameter der Funktion `gedcom_explorer` zuständig. 
+Außerdem bietet es die Möglichkeit eine json-Parameterdatei zu erstellen um sie später nocheinmal zu laden oder mit der Terminalversion des Explorers zu verwenden.
 
 ---
 
@@ -85,6 +86,10 @@ Die Konfigurationsdatei speichert die wichtigsten Parameter zur Wiederherstellun
 ---
 
 ## Bedienung
+Das Programm kann mit dem python interpreter gestartet werden. Dazu müssen die py-Scripte im gleichen Verzeichnis und die Icon-Datei (`prg_logo.ico`) im Verzeichnis `images` liegen.
+Es kann auch mit `pyinstaller` kompiliert werden und als ausführbare Datei gestartet werden. Eine Installations ist nicht erforderlich.
+
+### Mit GUI-Oberfläche
 
 1. **GEDCOM-Datei auswählen:** Klick auf „📂 Öffnen“, wähle eine `.ged` Datei.
 2. **Haupt-TAG wählen:** Im Dropdown erscheinen die Level-1-TAGs, wähle einen aus.
@@ -93,6 +98,17 @@ Die Konfigurationsdatei speichert die wichtigsten Parameter zur Wiederherstellun
 5. **Konfiguration speichern:** Benutze den Bereich „Definitionsdatei“ um Einstellungen als JSON zu speichern.
 6. **Konfiguration laden:** Lade gespeicherte Einstellungen, um schnell wieder in den vorherigen Zustand zurückzukehren.
 7. **Daten ausgeben:** Klick auf „📄 Ausgabe“ startet die Verarbeitung, die CSV-Datei wird erzeugt.
+
+### als Terminalprogramm
+GEDCOM-Explorer kann mit dem Parameter `--konsole` auch als Terminalprogramm genutzt werden. 
+Auf der Kommandoebene ist dem Programm eine zurvor von der GUI-Version erstellte Definitionsdatei im json-Format als Parameter mitzugeben:
+```bash
+python .\ged_explorer.py --konsole .\beispiel.json
+```
+oder als ausführbares Programm:
+```bash
+ged_explorer --konsole .\beispiel
+```
 
 ---
 

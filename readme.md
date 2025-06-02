@@ -35,7 +35,7 @@ pip install tk
 ---
 
 ## Verwendung
-
+### GUI-Oberfläche
 ```bash
 python ged_explorer.py
 ```
@@ -45,12 +45,28 @@ python ged_explorer.py
 3. Untertags auswählen und Spaltennamen anpassen
 4. (Optional) Jahrgangsoption aktivieren
 5. Auf **Ausgabe** klicken – eine CSV-Datei wird erstellt
+6. optional Programmfestlegungen als Definietionsdatei im json-Format speichern
+   für die spätere Wiederverwendung oder den Konsolenmodus
+
+### Konsolen-Modus (CLI)
+```bash
+python ged_explorer.py --konsole definitionen.json
+```
+### ausführbare Datei
+ged_explorer kann plattformunabhängig kompiliert werden
+Für Windwos:
+```bash
+  pyinstaller --onefile --windowed --icon=images\prg_logo.ico --add-data "images\prg_logo.ico;images" ged_explorer.py
+  ```
+  Eine Windows-EXE ist im Verzeichnis `/dist` bereits zur direkten Verwendung hinterlegt.
+  Eine Installation ist nicht erforderlich.
 
 ---
 
+
 ## Dateiaufbau
 
-* `ged_explorer.py`: GUI-Anwendung
+* `ged_explorer.py`: GUI-Anwendung und CLI-Steuerung
 * `ged_parser.py`: Logik zur GEDCOM-Verarbeitung und CSV-Erzeugung
 
 ---
@@ -84,6 +100,8 @@ Beispiel:
   * Da die L1-TAGs WIFE und HUSB in der csv-Datei immer ausgegeben werden, sind sie  
     bei der Liste der Merkmale der Ebene 1 nicht enthalten. 
 * ➕ **Neu**: Auswahl "Alle" oder "Keine" Untertags eingefügt
+* ➕ **Neu**: Wahlweise Ausführug als Konsolenprogramm mit dem Parameter `--konsole`
+  Dem Programm wird als weiterer Parameter eine Definitionsdatei im json-Format mitgegeben.
 * ℹ️ Programm- und Fenster-Icon implementiert 
   Kompilieren mit 
   ```bash
