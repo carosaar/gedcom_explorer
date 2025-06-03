@@ -21,7 +21,7 @@ Die Anwendung bietet
 ---
 ## Zweck des Programmes
 ### Problem des GEDCOM-Formats
-Das GEDCOM-Format erlaubt es, die Werte der TAGs beliebig zu wählen. Es gibt ausßer für den L0-TAG keine Syntaxvorschriften. Dies kann dazu beitragen, dass in einem Genealogieprojekt gleiche oder ähnliche Informationen unter verschiedenen TAGs abgelegt werden oder Projekt-Konventionen zur Schreibweise von TAG-Werten nicht eingehalten werden können, weil die Genealogieprogramme keine Syntaxprüfung durchführen.
+Das GEDCOM-Format erlaubt es, die Werte der TAGs beliebig zu wählen. Es gibt außer für den L0-TAG keine Syntaxvorschriften. Dies kann dazu beitragen, dass in einem Genealogieprojekt gleiche oder ähnliche Informationen unter verschiedenen TAGs abgelegt werden oder Projekt-Konventionen zur Schreibweise von TAG-Werten nicht eingehalten werden können, weil die Genealogieprogramme keine Syntaxprüfung durchführen.
 ### Konsequenz
 Eine Überprüfung der einheitlichen Informationszuordnung zu TAGs und die Kontrolle selbst vorgegebener Syntaxkonventionen ist nicht möglich. Es besteht daher die Gefahr, dass mit der Zeit das Projekt für eine systematische Auswertung, die Verwendung in Programmen zur strukturierten Darstellung der genealogischen Daten oder auch einfach zur Weitergabe schlicht unbrauchbar sind.
 ### Problemlösung
