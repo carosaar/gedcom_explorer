@@ -99,7 +99,7 @@ Beispiel:
 * 📄 **CSV-Erzeugung**: Erfolgreiche Verarbeitung gibt Pfad zur CSV-Datei an GUI zurück.
 * 🔒 **Robustheit**: Validierung von Dateipfaden und Benutzeraktionen.
 * ✅ Keine Beschränkung auf INDI- und FAM- Datensätze 
-* ✅ **CLI**: Ausführug als Konsolenprogramm mit dem Parameter `--konsole` zur Verwendung in batch-Programmen
+* ✅ **CLI**: Ausführug als Konsolenprogramm mit dem Parameter `--konsole` zur Verwendung in batch-Programmen.
   Dem Programm wird als weiterer Parameter eine **Definitionsdatei im JSON-Format** mitgegeben.
 
 ## Einschränkungen
@@ -123,7 +123,7 @@ GNU General Public-Lizenz
 
 ## Autor
 
-* Dieter Eckstein – 2025
-  https://www.carosaar.de
+Dieter Eckstein – 2025
+https://www.carosaar.de
 
 
