@@ -15,11 +15,13 @@ Beispielhafte Anwendung:
     2 WWW ✅ Spaltenname: "Link"
 ```
 → Ausgabe: DATEINAME_SOUR.csv mit Spalten: 
-  `ID, Typ, Quelle, Fundort, Zitat, Link`
+  ```ID, Typ, Quelle, Fundort, Zitat, Link```
 Die Daten der csv enthalten für jeden gefundenen Datensatz
-  `<INDI-Zeiger>, Zeigertyp (INDI oder FAM), SOUR-Wert, PAGE-Wert, TEXT-Wert, WWW-Wert`
+  ```<INDI-Zeiger>, Zeigertyp (INDI oder FAM), SOUR-Wert, PAGE-Wert, TEXT-Wert, WWW-Wert```
   Dabei werden Zeiger an den einschließenden `@@` erkannt und stets ohne die `@@`gespeichert:
-  `"I123","INDI","S222","Zitatstelle","Erläuterung","https://internet.com"`
+  ```
+"I123","INDI","S222","Zitatstelle","Erläuterung","https://internet.com"
+```
 
 ## Begriffe
 * **GUI-Modul**: `ged_explorer.py` enthält die **GUI-Steuerung** zur Bestimmung der zu untersuchenden ged-Struktur und den Parser-Aufruf im Logik-Modul 
@@ -33,12 +35,11 @@ Die Daten der csv enthalten für jeden gefundenen Datensatz
    Beispiel: *L2-DATE* der DATE-TAG der auf der Ebene 2 der Hierachie steht
    oder *L3-DATE* der DATE-TAG, der auf der Ebene 3 der Hierarchie steht.
    - `TAG`: allgemeine Bezeichnung eines TAGs der Ebene 1 bis 4 
-   - `TAG-Wert`: Der Text ("dies ist ein Text") oder ein Pointer (@I123@) auf einen Datensatz in der GED-Datei, der nach dem TAG
+   - `TAG-Wert`: Der Text ("dies ist ein Text") oder ein Pointer (@I123@) auf einen Datensatz in der GED-Datei, der nach dem TAG-Level folgt.
    - `UnterTAG`: allgemeine Bezeichnung eines TAGs der Ebene 2 bis 4
    - `Datensatz`: allgemeine Bezeichnung eines TAGs der Ebene 0
   **Besonderheit für L0-TAGs:**
   L0-TAGs definieren einen gencom-Datensatz mit einem **Datensatzzeiger** innerhalb der `@` Zeichen. Der **Datensatzbezeichner** nennt den Datensatztyp (INDI, FAM usw.). Der Datensatzzeiger wird auch als **Pointer** bezeichnet.
-  *Anmerkung*: Im Projekt werden nur Datensätze des Typs `INDI` und `FAM` untersucht. Alle anderen Datensätze bleiben unberücksichtigt.
 
   Ein konkreter TAG im Zusammenhang seiner Hierarchie werden die TAGs als **TAG-Struktur **in der Reihenfolge ihrer Ebenen mit Punkt getrennt. Die Ebene 0 kann entfallen. dann gilt die TAG-Struktur für alle Datensätze (z.B. .NOTE)
   Beispiele:
