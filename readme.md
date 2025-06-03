@@ -1,7 +1,7 @@
 
 # ![alt text](images/prg_logo_ico.png) GEDCOM Explorer – Version 1.1.0
 
-## Übersicht
+## Übersicht 
 
 **GEDCOM Explorer** ist ein Python-Tool zur gezielten Extraktion strukturierter Daten eines `L1-TAGs` und seinen UnterTAGs (`L2-L4 TAGs`) aus GEDCOM-Dateien in eine Tabelle im `CSV`-Format.  
 Die Anwendung bietet 
@@ -13,6 +13,8 @@ Die Anwendung bietet
   - optional eine Jahrgangsspalte bei Datumstags erzeugen kann.
   - Speichern der eingestellten werte in eine Definitionsdatei im `JSON`-Format
 * eine Konsolenversion (CLI), die in Batchdateien verwendet weden kann
+
+> ℹ️ **Anmerkung**: Verwendete Begriffe werden in der [Projektbeschreibung](Projektbeschreibung.md) definiert
 
 ---
 ## Bildschirmfoto
