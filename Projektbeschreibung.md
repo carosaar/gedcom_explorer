@@ -26,8 +26,8 @@ Die Daten der csv enthalten für jeden gefundenen Datensatz
 ## Begriffe
 * **GUI-Modul**: `ged_explorer.py` enthält die **GUI-Steuerung** zur Bestimmung der zu untersuchenden ged-Struktur und den Parser-Aufruf im Logik-Modul 
 * **Logikmodul**: Funktionsbibliothek `ged_parser.py` mit der Funktionsbibliothek zur parser-Logik 
-* **ged-Datei**: Die Eingabedatei im gedcomformat `<gedname>.ged`
-* **TAG-Bezeichnung**: Die gencom-TAGs werden mit zusammen mit ihrer Ebene (L0-L4) bezeichnet:
+* **ged-Datei**: Die Eingabedatei im GEDCOMformat `<gedname>.ged`
+* **TAG-Bezeichnung**: Die GEDCOM-TAGs werden zusammen mit ihrer Ebene (L0-L4) bezeichnet:
   z.B.: 
    - `Ln-TAG`: allgemine Bezeichnung eines TAGs der Ebene `n`
    Beispiel: *L1-TAG* ein TAG der Ebene 1
@@ -39,7 +39,7 @@ Die Daten der csv enthalten für jeden gefundenen Datensatz
    - `UnterTAG`: allgemeine Bezeichnung eines TAGs der Ebene 2 bis 4
    - `Datensatz`: allgemeine Bezeichnung eines TAGs der Ebene 0
   **Besonderheit für L0-TAGs:**
-  L0-TAGs definieren einen gencom-Datensatz mit einem **Datensatzzeiger** innerhalb der `@` Zeichen. Der **Datensatzbezeichner** nennt den Datensatztyp (INDI, FAM usw.). Der Datensatzzeiger wird auch als **Pointer** bezeichnet.
+  L0-TAGs definieren einen GEDCOM-Datensatz mit einem **Datensatzzeiger** innerhalb der `@` Zeichen. Der **Datensatzbezeichner** nennt den Datensatztyp (INDI, FAM usw.). Der Datensatzzeiger wird auch als **Pointer** bezeichnet.
 
   Ein konkreter TAG im Zusammenhang seiner Hierarchie werden die TAGs als **TAG-Struktur **in der Reihenfolge ihrer Ebenen mit Punkt getrennt. Die Ebene 0 kann entfallen. dann gilt die TAG-Struktur für alle Datensätze (z.B. .NOTE)
   Beispiele:
@@ -50,7 +50,7 @@ Die Daten der csv enthalten für jeden gefundenen Datensatz
 ---
 
 ## unspezifische Beschreibung des Logik-Moduls
-  Das Logikmodul enthält alle Funktionen, die für die Untersuchung der gedcom-Datei und Erstellung der csv-Datei notwendigen Funktionen bereitstellt. Die Hauptfunktion ist ist `gedcom_explorer()`. Sie wird vom GUI-Modul mit den in der GUI festgelegten Parametern (z.B. ged-Datei, zu untersuchender L1-TAG und Unter-TAGs) aufgerufen.
+  Das Logikmodul enthält alle Funktionen, die für die Untersuchung der GEDCOM-Datei und Erstellung der csv-Datei notwendigen Funktionen bereitstellt. Die Hauptfunktion ist ist `gedcom_explorer()`. Sie wird vom GUI-Modul mit den in der GUI festgelegten Parametern (z.B. ged-Datei, zu untersuchender L1-TAG und Unter-TAGs) aufgerufen.
   ### Eingabeparameter
   - `ged-Datei`: Pfad und Name der ged-Datei
   - `L1-TAG`: Name des L1-TAG, dessen UnterTAGs untersucht werden sollen
@@ -62,7 +62,7 @@ Die Daten der csv enthalten für jeden gefundenen Datensatz
   - `Flag`: logischer Wert, der angibt, ob eine Zusatzspalte `Jahrgang` nach einer Datumsspalte eingefügt wird, die das Jahr des Datums enthält.
   
   ### logischer Funktionsablauf
-  * Suche in der ged-Datei in allen INDI- und FAM-Datensätzen nach dem `L1-TAG` (**`Eingabeparameter 1`**)
+  * Suche in der ged-Datei in allen ~~INDI- und FAM-~~[^1] Datensätzen nach dem `L1-TAG` (**`Eingabeparameter 1`**)
   Merke dir dabei `Datensatzzeiger` (ohne @-Zeichen) und `Datensatztyp` (`INDI` oder `FAM`)
   * Sammle zu jedem gefundenen `L1-TAG` die `TAG-Werte` der `Unter-TAG` aus dem Katalog (**`Eingabeparameter 2`**) 
     - Entferne bei L2-TAG mit einem Zeigerwert als alleinger TAG-Wert (z.B. `1 SOUR @S222@` oder `2 HUSB @I123@`) die einschließenden @-Zeichen. d.h.: `@@` wird nicht entfernt, wenn eim TAG-Wert weiterer Text steht (z.B. 2 NOTE Möglicherweise auch `@I123@`)
@@ -85,7 +85,7 @@ Die Daten der csv enthalten für jeden gefundenen Datensatz
     | `CAL`                                           | `CAL JUN 1900`                    | `1900`   |
     | `BEF`, `AFT`, `BET`, `FROM`, `TO`, `EST`, `AND` | `BET 1900 AND 1910`               | *(leer)* |
     
-    siehe hierzu eine bereits fertig gestellte Funktion: [^1] 
+    siehe hierzu eine bereits fertig gestellte Funktion: [^2] 
 
 ### Ausgabe
 * Die Ausgabedatei ist im csv-Format UTF-8-Coding mit csv.QUOTE_ALL
@@ -98,34 +98,29 @@ Beispiel: Eingabedatei ist `..\eingabe.ged`, L1-TAG ist `SOUR` -> Ausgabedatei: 
 
 **NOP folgt später**
 
- [^1]: Code-Block `Jahrgang aus DATE extrahieren`
+ [^1]: ursprüngliche Absicht, nur INDI- und FAM-Datensätze zu bearbeiten wurde geändert!
+ [^2]: Code-Block `Jahrgang aus DATE extrahieren`
+    CODE-Block Jahrgang aus DATE extrahieren:
+    ```
+        def extrahiere_jahrgang(datum_raw):
+          if not datum_raw:
+              return ""
 
+          if datum_raw.startswith("INT"):
+              match = re.match(r"INT\s+([^\(]+)", datum_raw)
+              if match:
+                  return extrahiere_jahr_simple(match.group(1).strip())
 
+          if datum_raw.startswith("ABT") or datum_raw.startswith("CAL"):
+              rest = datum_raw[3:].strip()
+              return extrahiere_jahr_simple(rest)
 
- ---
- ## CODE-Block
- ### Jahrgang aus DATE extrahieren
+          if re.match(r"^(BEF|AFT|BET|TO|FROM|AND|EST)\b", datum_raw):
+              return ""
 
-```
-    def extrahiere_jahrgang(datum_raw):
-      if not datum_raw:
-          return ""
+          return extrahiere_jahr_simple(datum_raw)
 
-      if datum_raw.startswith("INT"):
-          match = re.match(r"INT\s+([^\(]+)", datum_raw)
-          if match:
-              return extrahiere_jahr_simple(match.group(1).strip())
-
-      if datum_raw.startswith("ABT") or datum_raw.startswith("CAL"):
-          rest = datum_raw[3:].strip()
-          return extrahiere_jahr_simple(rest)
-
-      if re.match(r"^(BEF|AFT|BET|TO|FROM|AND|EST)\b", datum_raw):
-          return ""
-
-      return extrahiere_jahr_simple(datum_raw)
-
-    def extrahiere_jahr_simple(text):
-        match = re.search(r"\b(\d{4})\b", text)
-        return match.group(1) if match else ""
-```
+        def extrahiere_jahr_simple(text):
+            match = re.search(r"\b(\d{4})\b", text)
+            return match.group(1) if match else ""
+    ```
