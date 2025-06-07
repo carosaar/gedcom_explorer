@@ -1,4 +1,4 @@
-# Version: 1.1.0
+# Version: 1.1.1
 # Datum: 2025-06.02
 # GUI- und CLI-Hybridmodul für ged_parser.py
 # CLI-Start mit: python ged_explorer.py --konsole definitionsdatei.json
@@ -6,6 +6,7 @@
 # * alle Datensätze außer HEAD und TRLR erlaubt (Anpassung in ged_parser.py -> Version 1.0.2a)
 # * Radiobuttons zur Auswahl aller oder keines Untertags
 # * Ausgabe auch ohne Auswahl eines Untertags erlauben (mit Hinweis)
+# * 1.1.1: L1-TAG "CHAN" wird einbezogen (Korrektur in Funktion finde_untertags())
 
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
@@ -153,7 +154,7 @@ class GedTagGUI:
                         is_tag = False
                 elif is_tag and zeile.startswith("1 "):
                     parts = zeile.strip().split()
-                    if len(parts) >= 2 and parts[1] not in ("CHAN", "CONT", "CONC", "HUSB", "WIFE"):
+                    if len(parts) >= 2 and parts[1] not in ("CONT", "CONC", "HUSB", "WIFE"):
                         tags.add(parts[1])
         return sorted(tags)
 
@@ -170,7 +171,7 @@ class GedTagGUI:
                     continue
                 ebene, curr_tag = parts[0], parts[1]
                 if ebene == "0":
-                    if len(parts) >= 3 and parts[2] in ("INDI", "FAM"):
+                    if len(parts) >= 3: # and parts[2] in ("INDI", "FAM"):
                         is_tag = True
                     else:
                         is_tag = False
@@ -178,7 +179,7 @@ class GedTagGUI:
                     akt_tag = curr_tag
                     erfasse = (akt_tag == tag)
                     prev_tags = ["", "", ""]
-                elif erfasse and ebene in ("2", "3", "4") and curr_tag not in ("CHAN", "CONT", "CONC"):
+                elif erfasse and ebene in ("2", "3", "4") and curr_tag not in ("CONT", "CONC"):
                     index = int(ebene) - 2
                     if index < len(prev_tags):
                         prev_tags[index] = curr_tag
