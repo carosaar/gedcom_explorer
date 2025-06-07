@@ -26,7 +26,7 @@ else:
 class GedTagGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("GEDCOM Explorer – Version 1.1.0")
+        self.root.title("GEDCOM Explorer – Version 1.1.1")
         self.root.geometry("800x600")
         self.root.minsize(width=600, height=600)
         self.dateipfad = ""
