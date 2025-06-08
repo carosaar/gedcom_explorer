@@ -114,10 +114,7 @@ Beispiel:
 
 ## Lizenz
 
-GNU General Public-Lizenz
-> Die Nutzung des Programmes und der Quellcode ist für private und kommerzielle Nutzung frei.
-> Bei Verwendung des Quellcodes bitte ich um einen Hinweis auf dieses github-Projekt und 
-> eine kurze Info an mich.
+Dieses Projekt ist unter der [MIT-Lizenz](LICENSE) lizenziert.
 
 ---
 
