@@ -459,29 +459,7 @@ class GedTagGUI:
             with open(pfad, "w", encoding="utf-8") as f:
                 json.dump(daten, f, indent=2, ensure_ascii=False)
             self.defdatei_label_var.set(pfad)    
-        daten = {
-            "gedcom_datei": self.dateipfad,
-            "haupttag": self.selected_tag.get(),
-            "untertags": {
-                struktur: self.entry_fields[struktur].get().strip()
-                for struktur, var in self.checkbox_vars.items()
-                if var.get()
-            },
-            "jahrgang_flag": self.jahrgang_flag.get(),
-            "cont_preview_length": self.cont_preview_length_var.get(),
-            "cont_separator": self.cont_separator_var.get()
-        }
-
-        pfad = filedialog.asksaveasfilename(
-            defaultextension=".json",
-            filetypes=[("JSON", "*.json")],
-            title="Definitionsdatei speichern"
-        )
-        if pfad:
-            with open(pfad, "w", encoding="utf-8") as f:
-                json.dump(daten, f, indent=2, ensure_ascii=False)
-            self.defdatei_label_var.set(pfad)
-
+        
 
     def definition_laden(self):
         pfad = filedialog.askopenfilename(filetypes=[("GEDCOM Explorer Definition", "*.gexp")])
