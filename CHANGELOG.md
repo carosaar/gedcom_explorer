@@ -6,7 +6,7 @@ Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 
 ---
 
-## [1.3] – 2025‑06‑XX
+## [1.3] – 2026-03-24
 ### Added
 - Auto‑Complete für L1‑TAG‑Eingabe
 - Live‑Filterung der L1‑TAG‑Liste während der Eingabe
