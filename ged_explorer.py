@@ -1,7 +1,5 @@
-# Version: 1.2.2
+# ged_explorer.py – Version 1.3 (modernisiertes Layout)
 # Datum: 2025-06-XX
-# GUI- und CLI-Hybridmodul für ged_parser.py
-# CLI-Start mit: python ged_explorer.py --konsole definitionsdatei.json
 
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
@@ -11,21 +9,17 @@ import argparse
 import sys
 from ged_parser import gedcom_explorer
 
-if getattr(sys, 'frozen', False):
-    base_path = sys._MEIPASS
-else:
-    base_path = os.path.abspath(".")
 
 class GedTagGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("GEDCOM Explorer – Version 1.2.2")
-        self.root.geometry("800x600")
-        self.root.minsize(width=600, height=650)
+        self.root.title("GEDCOM Explorer – Version 1.3")
+        self.root.geometry("820x520")
+        self.root.minsize(750, 500)
 
+        # Variablen
         self.dateipfad = ""
         self.level1_tags = []
-        self.untertags_mapping = {}
         self.selected_tag = tk.StringVar()
         self.jahrgang_flag = tk.BooleanVar()
         self.checkbox_vars = {}
@@ -35,230 +29,155 @@ class GedTagGUI:
         self.defdatei_label_var = tk.StringVar()
 
         # CONT/CONC-Optionen
-        self.cont_preview_length_var = tk.IntVar(value=50)  # 0, 20, 50, 100
-        self.cont_separator_var = tk.StringVar(value=" ")   # Standard: Leerzeichen
+        self.cont_preview_length_var = tk.IntVar(value=0)
+        self.cont_separator_var = tk.StringVar(value=" ")
 
         self.create_widgets()
 
-    def create_widgets(self):
-        # Datei-Auswahl
-        top_frame = tk.Frame(self.root, width=700, height=40)
-        top_frame.pack(pady=10)
-        top_frame.pack_propagate(False)
-        tk.Label(top_frame, text="Gedcom-Datei:").pack(side=tk.LEFT, padx=(5, 5))
-        entry_frame = tk.Frame(top_frame)
-        entry_frame.pack(side=tk.LEFT, fill="x", expand=True)
-        self.dateipfad_var = tk.StringVar()
-        self.dateipfad_entry = tk.Entry(entry_frame, textvariable=self.dateipfad_var, state="readonly", relief="sunken", width=50)
-        self.dateipfad_entry.pack(side=tk.TOP, fill="x", expand=True)
-        scroll_x = tk.Scrollbar(entry_frame, orient="horizontal", command=self.dateipfad_entry.xview)
-        scroll_x.pack(side=tk.BOTTOM, fill="x")
-        self.dateipfad_entry.config(xscrollcommand=scroll_x.set)
-        tk.Button(top_frame, text="📂 Öffnen", command=self.datei_waehlen).pack(side=tk.LEFT, padx=(10, 5))
 
-        # Auswahl Dropdown
-        auswahl_frame = tk.Frame(self.root)
-        auswahl_frame.pack(pady=5)
-        tk.Label(auswahl_frame, text="Wählen Sie ein Merkmal aus:").pack(side=tk.LEFT, padx=5)
-        self.dropdown = ttk.Combobox(auswahl_frame, textvariable=self.selected_tag, state="readonly")
-        self.dropdown.pack(side=tk.LEFT)
+    # ---------------------------------------------------------
+    # GUI-Elemente
+    # ---------------------------------------------------------
+
+    def create_widgets(self):
+
+
+        # -----------------------------------------------------
+        # Datei-Auswahl
+        # -----------------------------------------------------
+        file_frame = ttk.Frame(self.root)
+        file_frame.pack(fill="x", padx=8, pady=4)
+
+        ttk.Label(file_frame, text="GEDCOM-Datei:").pack(side="left", padx=4)
+        self.dateipfad_var = tk.StringVar()
+        self.dateipfad_entry = ttk.Entry(file_frame, textvariable=self.dateipfad_var)
+        self.dateipfad_entry.pack(side="left", fill="x", expand=True, padx=4)
+        ttk.Button(file_frame, text="📂 Öffnen", command=self.datei_waehlen).pack(side="left", padx=4)
+
+
+        # -----------------------------------------------------
+        # Haupttag-Auswahl
+        # -----------------------------------------------------
+        tag_frame = ttk.Frame(self.root)
+        tag_frame.pack(fill="x", padx=8, pady=4)
+
+        ttk.Label(tag_frame, text="Hauptmerkmal (L1-TAG):").pack(side="left", padx=4)
+        self.dropdown = ttk.Combobox(tag_frame, textvariable=self.selected_tag)
+        self.dropdown.bind("<Button-1>", self.select_all_l1)
+        self.dropdown.bind("<FocusOut>", self.on_l1_focus_out)
+        self.dropdown.bind("<Return>", self.confirm_l1_tag)
+        self.dropdown.bind("<KeyRelease>", self.filter_l1_tags)        
+        self.dropdown.pack(side="left", fill="x", expand=True, padx=4)
         self.dropdown.bind("<<ComboboxSelected>>", self.on_tag_selected)
 
-        # Jahrgangs-Checkbox
-        self.jahrgang_checkbox = tk.Checkbutton(self.root, text="Jahrgangsspalten bei DATE-TAGs ausgeben", variable=self.jahrgang_flag)
-        self.jahrgang_checkbox.pack(pady=5)
 
-        # CONT/CONC-Optionen
-        cont_frame = tk.LabelFrame(self.root, text="[  CONT/CONC-Vorschau  ]")
-        cont_frame.pack(padx=10, pady=5, fill="x")
-        tk.Label(cont_frame, text="Max. CONT/CONC-Zeichen:").pack(side=tk.LEFT, padx=(5, 5))
+        # -----------------------------------------------------
+        # Optionen (Jahrgang + CONT/CONC)
+        # -----------------------------------------------------
+        option_frame = ttk.LabelFrame(self.root, text="Optionen")
+        option_frame.pack(fill="x", padx=8, pady=4)
 
-        cont_length_combo = ttk.Combobox(
-            cont_frame,
+        # Jahrgang
+        ttk.Checkbutton(
+            option_frame,
+            text="Jahrgangsspalten bei DATE-TAGs erzeugen",
+            variable=self.jahrgang_flag
+        ).grid(row=0, column=0, sticky="w", padx=4, pady=4)
+
+        # CONT/CONC
+        ttk.Label(option_frame, text="Max. CONT/CONC-Zeichen:").grid(row=1, column=0, sticky="w", padx=4)
+        cont_combo = ttk.Combobox(
+            option_frame,
             state="readonly",
-            width=5,
+            width=6,
             values=[0, 20, 50, 100],
             textvariable=self.cont_preview_length_var
         )
-        cont_length_combo.pack(side=tk.LEFT, padx=(0, 10))
+        cont_combo.grid(row=1, column=1, sticky="w", padx=4)
 
-        tk.Label(cont_frame, text="Trennzeichen:").pack(side=tk.LEFT, padx=(5, 5))
-        cont_sep_entry = tk.Entry(cont_frame, textvariable=self.cont_separator_var, width=10)
-        cont_sep_entry.pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Label(option_frame, text="Trennzeichen:").grid(row=1, column=2, sticky="w", padx=4)
+        ttk.Entry(option_frame, textvariable=self.cont_separator_var, width=10).grid(row=1, column=3, sticky="w", padx=4)
 
-        tk.Label(cont_frame, text='Fortsetzungszeichen "(...)" wird bei CONT/CONC immer angefügt.').pack(side=tk.LEFT, padx=(10, 5))
-
-        # Untertags-Bereich
-        self.untertags_label = tk.Label(self.root, text="Untertags-Auswahl")
-        self.untertags_label.pack(pady=5)
-        self.frame_untertags_rahmen = tk.LabelFrame(self.root, text="[  Auswahl der Detailmerkmale  ]")
-        self.frame_untertags_rahmen.pack(padx=10, pady=5, fill="both", expand=True)
-        self.frame_untertags = tk.Frame(self.frame_untertags_rahmen)
-        self.frame_untertags.pack(padx=10, pady=10, fill="both", expand=True)
-
-        # Radiobutton-Optionen
-        self.untertags_option = tk.StringVar(value="Individuell")
-
-        # Definitionsdatei-Bereich
-        defdatei_frame = tk.Frame(self.root, width=700, height=40)
-        defdatei_frame.pack(pady=5, fill="x")
-        defdatei_frame.pack_propagate(False)
-        tk.Label(defdatei_frame, text="Definitionsdatei:").pack(side=tk.LEFT, padx=(5, 5))
-        entry_def_frame = tk.Frame(defdatei_frame)
-        entry_def_frame.pack(side=tk.LEFT, fill="x", expand=True)
-        self.defdatei_entry = tk.Entry(entry_def_frame, textvariable=self.defdatei_label_var, state="readonly", relief="sunken", width=50)
-        self.defdatei_entry.pack(side=tk.TOP, fill="x", expand=True)
-        scroll_def_x = tk.Scrollbar(entry_def_frame, orient="horizontal", command=self.defdatei_entry.xview)
-        scroll_def_x.pack(side=tk.BOTTOM, fill="x")
-        self.defdatei_entry.config(xscrollcommand=scroll_def_x.set)
-        buttons_def_frame = tk.Frame(defdatei_frame)
-        buttons_def_frame.pack(side=tk.LEFT, padx=10)
-        tk.Button(buttons_def_frame, text="📂 Laden", command=self.definition_laden).pack(side=tk.LEFT, padx=5)
-        tk.Button(buttons_def_frame, text="💾 Speichern", command=self.definition_speichern).pack(side=tk.LEFT, padx=5)
-
-        # Untere Button-Leiste
-        frame_bottom = tk.Frame(self.root)
-        frame_bottom.pack(side=tk.BOTTOM, fill=tk.X, pady=10, padx=10)
-        tk.Button(frame_bottom, text="ℹ️ Info", command=self.zeige_info).pack(side=tk.LEFT, padx=(0, 10))
-        self.output_button = tk.Button(frame_bottom, text="📄 Ausgabe", command=self.daten_ausgeben)
-        self.output_button.pack(side=tk.LEFT, expand=True)
-        tk.Button(frame_bottom, text="❌ Beenden", command=self.root.quit).pack(side=tk.RIGHT, padx=(10, 0))
-
-    def zeige_info(self):
-        info_text = (
-            "Dieses Programm dient dazu, strukturierte Daten aus GEDCOM-Dateien in eine csv-Datei zu extrahieren.\n"
-            "Wählen Sie eine GEDCOM-Datei, dann ein Hauptmerkmal (TAG), und wählen Sie anschließend "
-            "die relevanten Untertags und Spaltennamen.\nOptional können Jahrgangsspalten bei DATE-TAGs erzeugt werden.\n\n"
-            "- Es werden alle Datensätze verarbeitet.\n"
-            "- Spalte 1 enthält immer den Datensatzzeiger\n"
-            "  Spalte 2 enthält immer den Datensatztyp INDI, FAM, SOUR, OBJ...\n"
-            "- Zeiger werden ohne einschließende '@' gespeichert.\n\n"
-            "- Speichern und Laden von Einstellungen\n  (Definitionsdateien im JSON-Format).\n"
-            "- Start als Konsolenprogramm mit einer Definitionsdatei\n  Parameter: --konsole\n"
-            "- Die Zeiger HUSB und WIFE werden immer in den\n  Spalten 3 und 4 eingetragen (soweit vorhanden).\n\n"
-            "Neu in Version 1.2.2:\n"
-            "- Jahrgangsspalten pro DATE-Struktur (<Spaltenname>.JAHRGANG)\n"
-            "- CONT/CONC-Vorschau mit begrenzter Zeichenzahl und Trennzeichen\n"
-            "- Fortsetzungszeichen \"(...)\" nur bei NOTE-TAGs\n\n"
-            "© 2025 by Dieter Eckstein"
+        ttk.Label(option_frame, text='Fortsetzungszeichen "(...)" wird automatisch angefügt.').grid(
+            row=1, column=4, sticky="w", padx=10
         )
-        messagebox.showinfo("Info", info_text)
 
-    def datei_waehlen(self):
-        datei = filedialog.askopenfilename(filetypes=[["GEDCOM Dateien", "*.ged"]])
-        if datei:
-            self.dateipfad = datei
-            self.dateipfad_var.set(datei)
-            self.level1_tags = self.lese_level1_tags()
-            self.dropdown["values"] = self.level1_tags
-            self.selected_tag.set("")
-            self.dropdown.set("")
-            self.untertags_mapping = {}
-            self.zeige_untertags([])
-            self.jahrgang_checkbox.config(state="disabled")
-            self.definitionsdatei = ""
-            self.defdatei_label_var.set("")
 
-    def lese_level1_tags(self):
-        tags = set()
-        is_tag = False
-        with open(self.dateipfad, "r", encoding="utf-8") as f:
-            for zeile in f:
-                if zeile.startswith("0 "):
-                    parts = zeile.strip().split()
-                    if len(parts) >= 3 and parts[2] not in ("HEAD", "TRLR"):
-                        is_tag = True
-                    else:
-                        is_tag = False
-                elif is_tag and zeile.startswith("1 "):
-                    parts = zeile.strip().split()
-                    if len(parts) >= 2 and parts[1] not in ("CONT", "CONC", "HUSB", "WIFE"):
-                        tags.add(parts[1])
-        return sorted(tags)
+        # -----------------------------------------------------
+        # Untertags-Bereich
+        # -----------------------------------------------------
+        self.unter_frame = ttk.LabelFrame(self.root, text="Untertags")
+        self.unter_frame.pack(fill="both", expand=True, padx=8, pady=4)
 
-    def finde_untertags(self, tag):
-        untertags = set()
-        erfasse = False
-        is_tag = False
-        akt_tag = None
-        prev_tags = ["", "", ""]
-        with open(self.dateipfad, "r", encoding="utf-8") as f:
-            for zeile in f:
-                parts = zeile.strip().split(" ", 2)
-                if len(parts) < 2:
-                    continue
-                ebene, curr_tag = parts[0], parts[1]
-                if ebene == "0":
-                    if len(parts) >= 3:
-                        is_tag = True
-                    else:
-                        is_tag = False
-                elif ebene == "1" and is_tag:
-                    akt_tag = curr_tag
-                    erfasse = (akt_tag == tag)
-                    prev_tags = ["", "", ""]
-                elif erfasse and ebene in ("2", "3", "4") and curr_tag not in ("CONT", "CONC"):
-                    index = int(ebene) - 2
-                    if index < len(prev_tags):
-                        prev_tags[index] = curr_tag
-                    strukturteile = prev_tags[:index] + [curr_tag]
-                    struktur = ".".join(filter(None, strukturteile))
-                    untertags.add(struktur)
-        return sorted(untertags)
+        # Mindesthöhe setzen
+        self.unter_frame.configure(height=200)
+        self.unter_frame.pack_propagate(True)
+        # Radiobuttons
+        self.untertags_option = tk.StringVar(value="Individuell")
+        opt_frame = ttk.Frame(self.unter_frame)
+        opt_frame.pack(anchor="w", pady=4)
 
-    def on_tag_selected(self, event):
-        tag = self.selected_tag.get()
-        if not tag:
-            return
-        untertags = self.finde_untertags(tag)
-        if untertags:
-            self.nur_haupttag_auswahl = False
-            self.zeige_untertags(untertags)
-            self.untertags_label.config(text="Untertags-Auswahl")
-            hat_date = any("DATE" in u for u in untertags)
-            if hat_date:
-                self.jahrgang_checkbox.config(state="normal")
-            else:
-                self.jahrgang_checkbox.deselect()
-                self.jahrgang_checkbox.config(state="disabled")
-        else:
-            self.nur_haupttag_auswahl = True
-            self.zeige_untertags([])
-            self.untertags_label.config(text="Keine Untertags für diesen TAG vorhanden.")
-            self.jahrgang_checkbox.deselect()
-            self.jahrgang_checkbox.config(state="disabled")
+        ttk.Radiobutton(opt_frame, text="Alle", variable=self.untertags_option, value="Alle",
+                        command=self.on_options_radiobutton_changed).pack(side="left", padx=4)
+        ttk.Radiobutton(opt_frame, text="Keine", variable=self.untertags_option, value="Keine",
+                        command=self.on_options_radiobutton_changed).pack(side="left", padx=4)
 
-# ----  
+        # Untertags-Container
+        self.frame_checkboxes = ttk.Frame(self.unter_frame)
+        self.frame_checkboxes.pack(anchor="nw", padx=4, pady=2)
+
+
+        # -----------------------------------------------------
+        # Definitionsdatei
+        # -----------------------------------------------------
+        def_frame = ttk.Frame(self.root)
+        def_frame.pack(fill="x", padx=8, pady=4)
+
+        ttk.Label(def_frame, text="Definitionsdatei:").pack(side="left", padx=4)
+        self.defdatei_entry = ttk.Entry(def_frame, textvariable=self.defdatei_label_var)
+        self.defdatei_entry.pack(side="left", fill="x", expand=True, padx=4)
+
+        ttk.Button(def_frame, text="📂 Laden", command=self.definition_laden).pack(side="left", padx=4)
+        ttk.Button(def_frame, text="💾 Speichern", command=self.definition_speichern).pack(side="left", padx=4)
+
+
+        # -----------------------------------------------------
+        # Untere Button-Leiste
+        # -----------------------------------------------------
+        bottom = ttk.Frame(self.root)
+        bottom.pack(fill="x", padx=8, pady=(4, 6), anchor="s")
+
+        # Linker Bereich
+        left_frame = ttk.Frame(bottom)
+        left_frame.pack(side="left", anchor="w")
+        ttk.Button(left_frame, text="ℹ️ Info", command=self.zeige_info).pack(side="left", padx=4)
+
+        # Mittlerer Bereich (zentriert)
+        center_frame = ttk.Frame(bottom)
+        center_frame.pack(side="left", expand=True)
+        ttk.Button(center_frame, text="📄 Ausgabe", command=self.daten_ausgeben).pack(padx=4)
+
+        # Rechter Bereich
+        right_frame = ttk.Frame(bottom)
+        right_frame.pack(side="right", anchor="e")
+        ttk.Button(right_frame, text="❌ Beenden", command=self.root.quit).pack(side="right", padx=4)
+
+    # ---------------------------------------------------------
+    # Untertags anzeigen (10 pro Spalte)
+    # ---------------------------------------------------------
 
     def zeige_untertags(self, untertags):
-        # Frame leeren
-        for widget in self.frame_untertags.winfo_children():
+
+        for widget in self.frame_checkboxes.winfo_children():
             widget.destroy()
+
         self.checkbox_vars.clear()
         self.entry_fields.clear()
-
-        # Radiobuttons
-        self.frame_options = tk.Frame(self.frame_untertags)
-        self.frame_options.pack(anchor="w", pady=(0, 4))
-        self.rb_alle = tk.Radiobutton(
-            self.frame_options, text="Alle", variable=self.untertags_option, value="Alle",
-            command=self.on_options_radiobutton_changed
-        )
-        self.rb_alle.pack(side="left", padx=4)
-        self.rb_keine = tk.Radiobutton(
-            self.frame_options, text="Keine", variable=self.untertags_option, value="Keine",
-            command=self.on_options_radiobutton_changed
-        )
-        self.rb_keine.pack(side="left", padx=4)
 
         if not untertags:
             return
 
-        # Frame für Checkboxen + Entries (ohne expand=True!)
-        self.frame_checkboxes = tk.Frame(self.frame_untertags)
-        self.frame_checkboxes.pack(fill="x", expand=False)
-
-        max_zeilen = 10  # Pakete zu 10 Untertags pro Spalte
+        max_zeilen = 10
 
         for idx, struktur in enumerate(untertags):
             var = tk.BooleanVar()
@@ -271,27 +190,197 @@ class GedTagGUI:
             zeile = idx % max_zeilen
             spalte = idx // max_zeilen
 
-            # Checkbox
-            cb = tk.Checkbutton(self.frame_checkboxes, text=struktur, variable=var, anchor="w")
-            cb.grid(row=zeile, column=spalte * 2, sticky="w", padx=2, pady=0)
+            ttk.Checkbutton(self.frame_checkboxes, text=struktur, variable=var).grid(
+                row=zeile, column=spalte * 2, sticky="w", padx=2, pady=1
+            )
 
-            # Entry daneben
-            entry = tk.Entry(self.frame_checkboxes, width=15)
+            entry = ttk.Entry(self.frame_checkboxes, width=18)
             entry.insert(0, struktur)
-            entry.grid(row=zeile, column=spalte * 2 + 1, padx=(0, 6), pady=0, sticky="w")
+            entry.grid(row=zeile, column=spalte * 2 + 1, sticky="w", padx=(0, 10), pady=1)
             self.entry_fields[struktur] = entry
 
         # Spaltenbreite stabilisieren
         for col in range((len(untertags) // max_zeilen + 1) * 2):
-            self.frame_checkboxes.grid_columnconfigure(col, minsize=120)
+            self.frame_checkboxes.grid_columnconfigure(col, minsize=160)
 
-        self.untertags_option.set("Individuell")
 
-# -----
+    # ---------------------------------------------------------
+    # Restliche Funktionen (unverändert)
+    # ---------------------------------------------------------
+
+    def zeige_info(self):
+        info_text = (
+            "Dieses Programm dient dazu, strukturierte Daten aus GEDCOM-Dateien in eine csv-Datei zu extrahieren.\n"
+            "Wählen Sie eine GEDCOM-Datei, dann ein Hauptmerkmal (L1-TAG), und wählen Sie anschließend "
+            "die relevanten Untertags und Spaltennamen.\nOptional können Jahrgangsspalten bei DATE-TAGs erzeugt werden.\n\n"
+            "- Es werden alle Datensätze verarbeitet.\n"
+            "- Spalte 1 enthält immer den Datensatzzeiger\n"
+            "  Spalte 2 enthält immer den Datensatztyp INDI, FAM, SOUR, OBJ...\n"
+            "- Zeiger werden ohne einschließende '@' gespeichert.\n"
+            "- Speichern und Laden von Einstellungen\n  (Definitionsdateien im GEXP-Format).\n"
+            "- Start als Konsolenprogramm mit einer Definitionsdatei\n  Parameter: --konsole\n"
+            "- Die Zeiger HUSB und WIFE werden immer in den\n  Spalten 3 und 4 eingetragen (soweit vorhanden).\n\n"
+            "Neu in Version 1.3.0:\n"
+            "- NOTE.CONT/CONC-Vorschau mit begrenzter Zeichenzahl und Trennzeichen\n"
+            "- Modernisiertes, kompakteres Layout\n"
+            "- Neue Dateiendung für Definitionsdateien: .gexp\n\n"
+            "© 2025-2026 by Dieter Eckstein"
+        )
+        messagebox.showinfo("Info", info_text)
+
+    def datei_waehlen(self):
+        datei = filedialog.askopenfilename(filetypes=[["GEDCOM Dateien", "*.ged"]])
+        if datei:
+            self.dateipfad = datei
+            self.dateipfad_var.set(datei)
+            self.level1_tags = self.lese_level1_tags()
+            self.dropdown["values"] = self.level1_tags
+            self.selected_tag.set("")
+            self.zeige_untertags([])
+            self.jahrgang_flag.set(False)
+
+    def lese_level1_tags(self):
+        tags = set()
+        is_tag = False
+        with open(self.dateipfad, "r", encoding="utf-8") as f:
+            for zeile in f:
+                if zeile.startswith("0 "):
+                    parts = zeile.strip().split()
+                    is_tag = len(parts) >= 3 and parts[2] not in ("HEAD", "TRLR")
+                elif is_tag and zeile.startswith("1 "):
+                    parts = zeile.strip().split()
+                    if len(parts) >= 2 and parts[1] not in ("CONT", "CONC", "HUSB", "WIFE"):
+                        tags.add(parts[1])
+        return sorted(tags)
+
+    def finde_untertags(self, tag):
+        untertags = set()
+        erfasse = False
+        is_tag = False
+        prev_tags = ["", "", ""]
+        with open(self.dateipfad, "r", encoding="utf-8") as f:
+            for zeile in f:
+                parts = zeile.strip().split(" ", 2)
+                if len(parts) < 2:
+                    continue
+                ebene, curr_tag = parts[0], parts[1]
+                if ebene == "0":
+                    is_tag = len(parts) >= 3
+                elif ebene == "1" and is_tag:
+                    erfasse = (curr_tag == tag)
+                    prev_tags = ["", "", ""]
+                elif erfasse and ebene in ("2", "3", "4") and curr_tag not in ("CONT", "CONC"):
+                    index = int(ebene) - 2
+                    if index < len(prev_tags):
+                        prev_tags[index] = curr_tag
+                    strukturteile = prev_tags[:index] + [curr_tag]
+                    untertags.add(".".join(filter(None, strukturteile)))
+        return sorted(untertags)
+
+    def on_tag_selected(self, event):
+        tag = self.selected_tag.get()
+        if not tag:
+            return
+        untertags = self.finde_untertags(tag)
+        self.zeige_untertags(untertags)
+
+    def filter_l1_tags(self, event):
+        # Tasten, bei denen wir NICHT autovervollständigen
+        ignore_keys = ("Up", "Down", "Left", "Right", "Return", "Tab", "Escape")
+        edit_keys = ("BackSpace", "Delete")
+
+        # aktueller Text, den der Benutzer sieht
+        eingabe = self.dropdown.get()
+        eingabe_upper = eingabe.upper()
+
+        # komplette Liste
+        alle_tags = self.level1_tags
+
+        # Wenn nichts eingegeben ist: komplette Liste anzeigen
+        if eingabe == "":
+            self.dropdown["values"] = alle_tags
+            return
+
+        # Prefix-Filter: nur Tags, die mit der Eingabe beginnen
+        treffer = [tag for tag in alle_tags if tag.upper().startswith(eingabe_upper)]
+
+        # Wenn keine Treffer: Liste nicht leeren, sondern alles anzeigen
+        if not treffer:
+            self.dropdown["values"] = alle_tags
+            return
+
+        # Gefilterte Liste setzen
+        self.dropdown["values"] = treffer
+
+        # Bei Navigations-/Edit-Tasten kein Auto-Complete erzwingen
+        if event.keysym in ignore_keys or event.keysym in edit_keys:
+            return
+
+        # Auto-Complete: ersten Treffer nehmen und nur ergänzen
+        erster = treffer[0]
+
+        # Wenn der erste Treffer genau der Eingabe entspricht → nichts ergänzen
+        if erster.upper() == eingabe_upper:
+            return
+
+        # Inhalt auf ersten Treffer setzen
+        self.dropdown.delete(0, tk.END)
+        self.dropdown.insert(0, erster)
+
+        # Nur den ergänzten Teil markieren
+        self.dropdown.icursor(len(eingabe))
+        self.dropdown.select_range(len(eingabe), tk.END)    
+
+    def confirm_l1_tag(self, event=None):
+        eingabe = self.dropdown.get().upper()
+
+        # Wenn Eingabe leer → nichts tun
+        if not eingabe:
+            return
+
+        # Trefferliste wie beim Filtern
+        treffer = [tag for tag in self.level1_tags if tag.upper().startswith(eingabe)]
+
+        # Wenn es Treffer gibt → ersten übernehmen
+        if treffer:
+            self.dropdown.set(treffer[0])
+            self.selected_tag.set(treffer[0])
+            self.on_tag_selected(None)
+
+    def on_l1_focus_out(self, event=None):
+        eingabe = self.dropdown.get().strip().upper()
+
+        # Leeres Feld → nichts tun
+        if eingabe == "":
+            return
+
+        # Prüfen, ob Eingabe ein gültiger L1-TAG ist
+        gueltige_tags = [tag.upper() for tag in self.level1_tags]
+
+        if eingabe in gueltige_tags:
+            # gültig → Untertags laden
+            self.selected_tag.set(eingabe)
+            self.on_tag_selected(None)
+        else:
+            # ungültig → Fehlermeldung und Fokus zurück
+            messagebox.showerror(
+                "Ungültiger L1-TAG",
+                f"'{eingabe}' ist kein gültiger L1-TAG.\nBitte einen gültigen Wert eingeben."
+            )
+            # Fokus zurück auf das Feld
+            self.dropdown.focus_set()
+            # Markieren, damit der Benutzer direkt überschreiben kann
+            self.dropdown.select_range(0, tk.END)
+
+
+    def select_all_l1(self, event=None):
+        # Markiert den gesamten Inhalt, sobald in das Feld geklickt wird
+        self.dropdown.after(1, lambda: self.dropdown.select_range(0, tk.END))
+
+
+
     def on_options_radiobutton_changed(self):
         option = self.untertags_option.get()
-        if not self.checkbox_vars:
-            return
         if option == "Alle":
             for var in self.checkbox_vars.values():
                 var.set(True)
@@ -310,25 +399,14 @@ class GedTagGUI:
 
     def daten_ausgeben(self):
         if not self.dateipfad or not self.selected_tag.get():
-            messagebox.showwarning("Warnung", "Bitte wählen Sie eine Datei und ein Merkmal aus.")
+            messagebox.showwarning("Warnung", "Bitte Datei und TAG wählen.")
             return
-        katalog = {}
-        for struktur, var in self.checkbox_vars.items():
-            if var.get():
-                spaltenname = self.entry_fields[struktur].get().strip()
-                if spaltenname:
-                    katalog[struktur] = spaltenname
-        if not katalog and not self.nur_haupttag_auswahl:
-            antwort = messagebox.askyesno(
-                "Keine Untertags ausgewählt",
-                "Sie haben keine Untertags ausgewählt.\n"
-                "Möchten Sie wirklich fortfahren und nur den Haupttag exportieren?"
-            )
-            if not antwort:
-                return
 
-        cont_preview_length = int(self.cont_preview_length_var.get())
-        cont_separator = self.cont_separator_var.get()
+        katalog = {
+            struktur: self.entry_fields[struktur].get().strip()
+            for struktur, var in self.checkbox_vars.items()
+            if var.get()
+        }
 
         try:
             csv_datei = gedcom_explorer(
@@ -336,158 +414,133 @@ class GedTagGUI:
                 self.selected_tag.get(),
                 katalog,
                 self.jahrgang_flag.get(),
-                cont_preview_length=cont_preview_length,
-                cont_separator=cont_separator
+                cont_preview_length=self.cont_preview_length_var.get(),
+                cont_separator=self.cont_separator_var.get()
             )
-            messagebox.showinfo("Erfolg", f"CSV-Datei erfolgreich erstellt:\n{csv_datei}")
+            messagebox.showinfo("Erfolg", f"CSV-Datei erstellt:\n{csv_datei}")
         except Exception as e:
-            messagebox.showerror("Fehler", f"Fehler bei der Verarbeitung: {e}")
+            messagebox.showerror("Fehler", str(e))
 
     def definition_speichern(self):
-        if not self.dateipfad_var.get() or not self.selected_tag.get():
-            messagebox.showwarning("Warnung", "Bitte wählen Sie eine GEDCOM-Datei und einen Haupttag aus.")
+        if not self.dateipfad or not self.selected_tag.get():
+            messagebox.showwarning("Warnung", "Bitte wählen Sie eine GEDCOM-Datei und ein L1-TAG aus.")
             return
-        gedcom_pfad = self.dateipfad_var.get()
+
+        gedcom_pfad = self.dateipfad
         haupttag = self.selected_tag.get()
-        untertags = {}
-        for struktur, var in self.checkbox_vars.items():
-            if var.get():
-                spaltenname = self.entry_fields[struktur].get().strip()
-                if spaltenname:
-                    untertags[struktur] = spaltenname
-        jahrgang_flag = self.jahrgang_flag.get()
-        cont_preview_length = int(self.cont_preview_length_var.get())
-        cont_separator = self.cont_separator_var.get()
+
+        # Basisname der GEDCOM-Datei
+        basisname = os.path.splitext(os.path.basename(gedcom_pfad))[0]
+
+        # Neuer vorgeschlagener Dateiname
+        vorgeschlagener_name = f"{basisname}_{haupttag}.gexp"
 
         daten = {
             "gedcom_datei": gedcom_pfad,
             "haupttag": haupttag,
-            "untertags": untertags,
-            "jahrgang_flag": jahrgang_flag,
-            "cont_preview_length": cont_preview_length,
-            "cont_separator": cont_separator
+            "untertags": {
+                struktur: self.entry_fields[struktur].get().strip()
+                for struktur, var in self.checkbox_vars.items()
+                if var.get()
+            },
+            "jahrgang_flag": self.jahrgang_flag.get(),
+            "cont_preview_length": self.cont_preview_length_var.get(),
+            "cont_separator": self.cont_separator_var.get()
         }
 
-        start_dir = os.getcwd()
-        basisname = os.path.splitext(os.path.basename(gedcom_pfad))[0]
-        vorgeschlagener_name = f"{basisname}_{haupttag}.json"
-        speicherpfad = filedialog.asksaveasfilename(
-            defaultextension=".json",
-            filetypes=[("JSON-Dateien", "*.json")],
-            initialdir=start_dir,
+        pfad = filedialog.asksaveasfilename(
+            defaultextension=".gexp",
+            filetypes=[("GEDCOM Explorer Definition", "*.gexp")],
             initialfile=vorgeschlagener_name,
             title="Definitionsdatei speichern"
         )
-        if speicherpfad:
-            try:
-                with open(speicherpfad, "w", encoding="utf-8") as f:
-                    json.dump(daten, f, indent=2, ensure_ascii=False)
-                messagebox.showinfo("Erfolg", f"Definitionsdatei gespeichert:\n{speicherpfad}")
-            except Exception as e:
-                messagebox.showerror("Fehler", f"Fehler beim Speichern:\n{e}")
+
+        if pfad:
+            with open(pfad, "w", encoding="utf-8") as f:
+                json.dump(daten, f, indent=2, ensure_ascii=False)
+            self.defdatei_label_var.set(pfad)    
+        daten = {
+            "gedcom_datei": self.dateipfad,
+            "haupttag": self.selected_tag.get(),
+            "untertags": {
+                struktur: self.entry_fields[struktur].get().strip()
+                for struktur, var in self.checkbox_vars.items()
+                if var.get()
+            },
+            "jahrgang_flag": self.jahrgang_flag.get(),
+            "cont_preview_length": self.cont_preview_length_var.get(),
+            "cont_separator": self.cont_separator_var.get()
+        }
+
+        pfad = filedialog.asksaveasfilename(
+            defaultextension=".json",
+            filetypes=[("JSON", "*.json")],
+            title="Definitionsdatei speichern"
+        )
+        if pfad:
+            with open(pfad, "w", encoding="utf-8") as f:
+                json.dump(daten, f, indent=2, ensure_ascii=False)
+            self.defdatei_label_var.set(pfad)
+
 
     def definition_laden(self):
-        datei = filedialog.askopenfilename(
-            filetypes=[("JSON-Dateien", "*.json")],
-            initialdir=os.getcwd(),
-            title="Definitionsdatei laden"
-        )
-        if datei:
-            try:
-                with open(datei, "r", encoding="utf-8") as f:
-                    daten = json.load(f)
-                gedcom_pfad = daten.get("gedcom_datei", "")
-                haupttag = daten.get("haupttag", "")
-                untertags = daten.get("untertags", {})
-                jahrgang_flag = daten.get("jahrgang_flag", False)
-                cont_preview_length = daten.get("cont_preview_length", 50)
-                cont_separator = daten.get("cont_separator", " ")
+        pfad = filedialog.askopenfilename(filetypes=[("GEDCOM Explorer Definition", "*.gexp")])
+        if not pfad:
+            return
 
-                if gedcom_pfad:
-                    self.dateipfad_var.set(gedcom_pfad)
-                    self.dateipfad = gedcom_pfad
-                    self.level1_tags = self.lese_level1_tags()
-                    self.dropdown["values"] = self.level1_tags
-                else:
-                    messagebox.showwarning("Warnung", "Kein Pfad zur GEDCOM-Datei in der Definitionsdatei gefunden.")
+        with open(pfad, "r", encoding="utf-8") as f:
+            daten = json.load(f)
 
-                if haupttag:
-                    self.selected_tag.set(haupttag)
-                    self.on_tag_selected(None)
-                    for struktur, var in self.checkbox_vars.items():
-                        var.set(struktur in untertags)
-                    for struktur, spaltenname in untertags.items():
-                        if struktur in self.entry_fields:
-                            self.entry_fields[struktur].delete(0, "end")
-                            self.entry_fields[struktur].insert(0, spaltenname)
-                else:
-                    self.selected_tag.set("")
-                    self.zeige_untertags([])
+        self.dateipfad = daten["gedcom_datei"]
+        self.dateipfad_var.set(self.dateipfad)
+        self.level1_tags = self.lese_level1_tags()
+        self.dropdown["values"] = self.level1_tags
 
-                self.jahrgang_flag.set(jahrgang_flag)
-                if jahrgang_flag:
-                    self.jahrgang_checkbox.select()
-                else:
-                    self.jahrgang_checkbox.deselect()
+        self.selected_tag.set(daten["haupttag"])
+        self.on_tag_selected(None)
 
-                self.cont_preview_length_var.set(cont_preview_length)
-                self.cont_separator_var.set(cont_separator)
+        for struktur, var in self.checkbox_vars.items():
+            var.set(struktur in daten["untertags"])
 
-                self.definitionsdatei = datei
-                self.defdatei_label_var.set(datei)
+        for struktur, name in daten["untertags"].items():
+            if struktur in self.entry_fields:
+                self.entry_fields[struktur].delete(0, "end")
+                self.entry_fields[struktur].insert(0, name)
 
-            except Exception as e:
-                messagebox.showerror("Fehler", f"Fehler beim Laden der Definitionsdatei:\n{e}")
+        self.jahrgang_flag.set(daten.get("jahrgang_flag", False))
+        self.cont_preview_length_var.set(daten.get("cont_preview_length", 50))
+        self.cont_separator_var.set(daten.get("cont_separator", " "))
 
-    def run(self):
-        self.root.mainloop()
+        self.defdatei_label_var.set(pfad)
 
+
+# ---------------------------------------------------------
+# CLI-Modus
+# ---------------------------------------------------------
 
 def main():
     parser = argparse.ArgumentParser(description="GEDCOM-Explorer GUI/CLI")
-    parser.add_argument('--konsole', metavar='DEFINITION.json', help='Starte im Konsolenmodus mit einer Definitionsdatei im JSON-Format')
+    parser.add_argument('--konsole', metavar='DEFINITION.json')
     args = parser.parse_args()
 
     if args.konsole:
-        json_pfad = args.konsole
-        if not os.path.exists(json_pfad):
-            print(f"Fehler: Definitionsdatei '{json_pfad}' wurde nicht gefunden.", file=sys.stderr)
-            sys.exit(1)
-        try:
-            with open(json_pfad, "r", encoding="utf-8") as f:
-                daten = json.load(f)
-            gedcom_pfad = daten.get("gedcom_datei", "")
-            haupttag = daten.get("haupttag", "")
-            untertags = daten.get("untertags", {})
-            jahrgang_flag = daten.get("jahrgang_flag", False)
-            cont_preview_length = daten.get("cont_preview_length", 50)
-            cont_separator = daten.get("cont_separator", " ")
+        with open(args.konsole, "r", encoding="utf-8") as f:
+            daten = json.load(f)
 
-            if not gedcom_pfad or not os.path.exists(gedcom_pfad):
-                print(f"Fehler: GEDCOM-Datei '{gedcom_pfad}' wurde nicht gefunden.", file=sys.stderr)
-                sys.exit(1)
-
-            csv_datei = gedcom_explorer(
-                gedcom_pfad,
-                haupttag,
-                untertags,
-                jahrgang_flag,
-                cont_preview_length=cont_preview_length,
-                cont_separator=cont_separator
-            )
-            print(f"CSV-Datei gespeichert unter: {csv_datei}")
-        except Exception as e:
-            print(f"Fehler bei der Verarbeitung: {e}", file=sys.stderr)
-            sys.exit(1)
+        csv_datei = gedcom_explorer(
+            daten["gedcom_datei"],
+            daten["haupttag"],
+            daten["untertags"],
+            daten["jahrgang_flag"],
+            cont_preview_length=daten.get("cont_preview_length", 50),
+            cont_separator=daten.get("cont_separator", " ")
+        )
+        print("CSV-Datei erstellt:", csv_datei)
     else:
-        icon_path = os.path.join(base_path, "images", "prg_logo.ico")
         root = tk.Tk()
-        try:
-            root.iconbitmap(icon_path)
-        except Exception:
-            pass
         app = GedTagGUI(root)
         root.mainloop()
+
 
 if __name__ == "__main__":
     main()
