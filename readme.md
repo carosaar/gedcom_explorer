@@ -1,5 +1,3 @@
-# 📘 **README.md (neu für Release 1.3)**
-
 # ![alt text](images/prg_logo_ico.png) GEDCOM Explorer – Version 1.3
 24.03.2026
 
