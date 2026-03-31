@@ -1,17 +1,52 @@
-/test
-/__pycache__
-/build
-/dist
-/installer
-/Dokumentiertes_pyScript
-*.csv
+# --- Python Basics ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Byte-compiled / optimized / DLL files
+*.dll
+*.dylib
+
+# --- Build & Distribution ---
+build/
+dist/
+installer/
+release/
+*.spec
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer artifacts
 *.exe
+*.msi
 *.zip
 *.iss
+
+# Logs & temp
+*.log
+*.tmp
+*.temp
+
+# CSV, TXT, Testdateien
+*.csv
 *.txt
 *test*
-*.spec
 *lernen*
+
+# Images (falls gewünscht)
 images/Logo_FB-Illingen mit Adresse.png
 images/QR-Code.png
+
+# Project-specific
+/Dokumentiertes_pyScript
+/test
 ged_tag.spec
