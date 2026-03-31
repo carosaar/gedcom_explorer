@@ -2,9 +2,9 @@
 *.exe
 *.zip
 *test*
-build/
-dist/
-installer/
+/build/*
+/dist/*
+/installer/*
 *.spec
 *lernen*
 images/Logo_FB-Illingen mit Adresse.png
