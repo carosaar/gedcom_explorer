@@ -1,43 +1,3 @@
-[Code]
-function GetLatestVersion: String;
-var
-  VersionURL: String;
-begin
-  VersionURL := 'https://github.com/carosaar/gedcom_explorer/version.txt';
-  try
-    Result := Trim(DownloadTemporaryFile(VersionURL));
-  except
-    Result := '';
-  end;
-end;
-
-function CompareVersions(Current, Latest: String): Integer;
-begin
-  Result := CompareStr(Current, Latest);
-end;
-
-function InitializeSetup(): Boolean;
-var
-  Latest: String;
-  Current: String;
-begin
-  Current := '1.3';  // Deine aktuelle Version
-  Latest := GetLatestVersion;
-
-  if Latest <> '' then begin
-    if CompareVersions(Current, Latest) < 0 then begin
-      MsgBox(
-        'Es ist eine neuere Version verfügbar (' + Latest + ').' + #13#10 +
-        'Du verwendest Version ' + Current + '.' + #13#10#13#10 +
-        'Bitte lade die aktuelle Version herunter.',
-        mbInformation, MB_OK
-      );
-    end;
-  end;
-
-  Result := True;
-end;
-
 [Setup]
 AppName=GEDCOM Explorer
 AppVersion=1.3
@@ -47,8 +7,6 @@ OutputDir=output
 OutputBaseFilename=GEDCOM_Explorer_Setup
 Compression=lzma
 SolidCompression=yes
-
-; Optional
 SetupIconFile=release\prg_logo.ico
 
 [Languages]
@@ -68,3 +26,4 @@ Name: "desktopicon"; Description: "Desktop-Verknüpfung erstellen"; GroupDescrip
 
 [Run]
 Filename: "{app}\ged_explorer.exe"; Description: "GEDCOM Explorer starten"; Flags: nowait postinstall skipifsilent
+
