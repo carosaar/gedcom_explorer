@@ -1,6 +1,10 @@
 *.csv
+# *.exe
+# *.zip
 *test*
-/build
+build/
+# dist/
+# installer/
 *.spec
 *lernen*
 images/Logo_FB-Illingen mit Adresse.png
