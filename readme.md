@@ -7,6 +7,10 @@
 
 Ein leistungsstarkes Tool zur Analyse und Extraktion von GEDCOM-Daten in strukturierte CSV-Dateien.
 
+
+## 👆 Wichtig!
+**Es werden keine ged-Dateien geändert!**
+
 ---
 
 ## 🚀 Features
