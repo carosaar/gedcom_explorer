@@ -1,18 +1,17 @@
+/test
+/__pycache__
+/build
+/dist
+/installer
+/Dokumentiertes_pyScript
 *.csv
 *.exe
 *.zip
 *.iss
 *.txt
 *test*
-/build/*
-/dist/*
-/installer/*
 *.spec
 *lernen*
 images/Logo_FB-Illingen mit Adresse.png
 images/QR-Code.png
-/Dokumentiertes_pyScript
-/test
 ged_tag.spec
-__pycache__
-installer/installer.iss
