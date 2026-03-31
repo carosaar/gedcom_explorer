@@ -30,7 +30,8 @@ Ein leistungsstarkes Tool zur Analyse und Extraktion von GEDCOM-Daten in struktu
 
 1. ZIP-Datei herunterladen  
 2. Entpacken  
-3. `ged_explorer.exe` starten  
+3. Installer ausführen
+4. `ged_explorer.exe` starten  
 
 ---
 
