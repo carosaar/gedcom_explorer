@@ -12,3 +12,4 @@ images/QR-Code.png
 /Dokumentiertes_pyScript
 /test
 ged_tag.spec
+__pycache__
