@@ -7,6 +7,16 @@ Das Format orientiert sich an „Keep a Changelog“.
 
 ---
 
+## [1.3.1] – 2026‑03‑24
+
+### Fixed
+- **HUSB/WIFE‑Spalten wurden nicht befüllt**  
+  Ursache: `flush_eintrag()` wurde bei jedem L1‑TAG ausgeführt, auch bei `HUSB` und `WIFE`.  
+  Dadurch wurden die eingelesenen Werte vorzeitig verworfen, bevor der relevante L1‑TAG verarbeitet wurde.  
+  Lösung: `flush_eintrag()` wird nun **nicht mehr** bei `HUSB` und `WIFE` ausgeführt; die Werte bleiben erhalten und werden korrekt in die CSV übernommen.
+
+---
+
 ## [1.3] – 2026-03-24
 
 ### Added

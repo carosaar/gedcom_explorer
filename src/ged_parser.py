@@ -125,8 +125,11 @@ def gedcom_explorer(
         if ebene == "1":
             if tag == "HUSB":
                 husb = wert.strip("@")
+                continue
+                
             elif tag == "WIFE":
                 wife = wert.strip("@")
+                continue
 
             flush_eintrag()
             akt_untertagswerte = {}
