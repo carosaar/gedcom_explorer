@@ -13,7 +13,7 @@ from ged_parser import gedcom_explorer
 class GedTagGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("GEDCOM Explorer – Version 1.3.1")
+        self.root.title("GEDCOM Explorer – Version 1.3.2")
         self.root.geometry("820x520")
         self.root.minsize(750, 500)
 

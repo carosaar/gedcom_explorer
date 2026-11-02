@@ -7,6 +7,32 @@ Das Format orientiert sich an „Keep a Changelog“.
 
 ---
 
+## [1.3.2] – 2026‑11‑02
+
+### Fixed
+- **HUSB/WIFE wurden nicht in allen MARR‑Einträgen übernommen**  
+  Ursache: Partner‑Tags wurden nur an der Fundstelle gesetzt.  
+  Lösung: HUSB/WIFE werden nun global pro FAM‑Datensatz erfasst und in alle zugehörigen MARR‑Zeilen eingetragen.
+
+- **Untertags (DATE, PLAC, TYPE) gingen verloren**, wenn zwischen MARR und den Untertags andere L1‑Tags standen  
+  Lösung: Untertags werden nur verarbeitet, wenn der Eltern‑L1‑TAG dem gesuchten L1‑TAG entspricht.
+
+- **CHAN.DATE wurde als zusätzlicher MARR.DATE interpretiert**  
+  Lösung: CHAN‑Untertags werden korrekt ausgeschlossen.
+
+- **Jahrgangsspalten wurden nicht berechnet**, wenn DATE nicht eingelesen wurde  
+  Lösung: DATE wird wieder zuverlässig erfasst, Jahrgang wird korrekt extrahiert.
+
+### Improved
+- **Mehrere MARR‑Blöcke pro FAM‑Datensatz** werden vollständig und konsistent exportiert.  
+- **SOUR‑Blöcke** werden stabil verarbeitet, inklusive aller Untertags.
+
+---
+
+Wenn du willst, kann ich dir jetzt auch die README‑Ergänzung für 1.3.2 formulieren.
+
+---
+
 ## [1.3.1] – 2026‑03‑24
 
 ### Fixed

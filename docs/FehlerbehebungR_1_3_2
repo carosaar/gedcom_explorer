@@ -1,0 +1,52 @@
+## 📘 **Release‑Beschreibung – Problemformulierung für Version 1.3.2**
+
+### 🧩 **Ausgangslage (Version 1.3.1)**  
+Der Parser 1.3.1 funktionierte stabil für einfache FAM‑Strukturen, hatte aber mehrere strukturelle Schwächen, die erst bei realen GEDCOM‑Dateien sichtbar wurden:
+
+1. **HUSB und WIFE wurden nur übernommen, wenn sie vor oder direkt nach dem gesuchten L1‑TAG standen.**  
+   Sobald andere L1‑Tags (z. B. `SOUR`, `NOTE`, `CHAN`, `_UID`) zwischen MARR und HUSB/WIFE standen, wurden die Partner‑IDs nicht mehr in die MARR‑Zeilen geschrieben.
+
+2. **Bei mehreren MARR‑Blöcken im selben FAM‑Datensatz**  
+   wurde HUSB/WIFE nur im *letzten* MARR‑Eintrag gesetzt.  
+   Frühere MARR‑Einträge blieben leer.
+
+3. **Untertags (DATE, PLAC, TYPE) wurden fälschlich verworfen**, wenn zwischen MARR und den Untertags andere L1‑Tags standen.  
+   Dadurch entstanden unvollständige Zeilen wie:
+
+>  "ID","Typ","HUSB","WIFE","MARR","DATE","PLAC","TYPE","DATE.JAHRGANG"
+  "F101129","FAM","","","","10 MAY 1860 || 23 AUG 2026","Heusweiler","CIVIL","1860"
+  "F101129","FAM","I101128","I014445","Y","","","Religeous",""
+
+4. **CHAN.DATE wurde als weiterer MARR.DATE interpretiert**, was zu doppelten DATE‑Werten führte:
+
+   
+> "F101129","FAM","","","","10 MAY 1860 || 23 AUG 2026","Heusweiler","CIVIL","1860"
+   
+
+5. **Die Jahrgangsberechnung (DATE.JAHRGANG)**  
+   funktionierte nicht mehr, sobald DATE nicht korrekt eingelesen wurde.
+
+---
+
+## 🎯 **Kernursache**
+
+Alle Probleme hatten denselben Ursprung:
+
+**Der Parser verlor den Kontext des gesuchten L1‑TAGs (z. B. MARR), sobald ein anderer L1‑TAG erschien.**  
+
+Dadurch wurden Untertags falsch zugeordnet oder gar nicht verarbeitet, und HUSB/WIFE wurden nicht mehr in alle relevanten Einträge übernommen.
+
+---
+
+## 🛠️ **Fix‑Zielsetzung für Release 1.3.2**
+
+Release 1.3.2 behebt diese strukturellen Fehler vollständig:
+
+- **HUSB/WIFE werden unabhängig von ihrer Position im FAM‑Block erfasst.**
+- **Alle MARR‑Einträge eines FAM‑Datensatzes erhalten konsistent dieselben HUSB/WIFE‑Werte.**
+- **Untertags werden nur verarbeitet, wenn sie zum gesuchten L1‑TAG gehören.**
+- **Andere L1‑Tags (SOUR, NOTE, CHAN, _UID …) beeinflussen den MARR‑Block nicht mehr.**
+- **CHAN.DATE wird nicht mehr als MARR.DATE interpretiert.**
+- **DATE/PLAC/TYPE werden wieder korrekt eingelesen.**
+- **DATE.JAHRGANG wird zuverlässig berechnet.**
+

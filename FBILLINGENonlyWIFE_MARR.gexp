@@ -1,0 +1,12 @@
+{
+  "gedcom_datei": "C:/Users/dieec/Documents/pyEntwicklung/gedcom_explorer/FBILLINGENonlyWIFE.ged",
+  "haupttag": "MARR",
+  "untertags": {
+    "DATE": "DATE",
+    "PLAC": "PLAC",
+    "TYPE": "TYPE"
+  },
+  "jahrgang_flag": true,
+  "cont_preview_length": 0,
+  "cont_separator": " "
+}

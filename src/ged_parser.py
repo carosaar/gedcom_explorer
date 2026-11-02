@@ -1,12 +1,12 @@
 """
-Version: 1.2.2
-Datum: 2025-06-XX
+Version: 1.3.2
+Datum: 2026-11-01
 
-Optimierungen:
-- CONT/CONC werden ausschließlich NOTE-TAGs zugeordnet
-- Bei cont_preview_length = 0: keine Vorschau, keine Trennzeichen
-- Fortsetzungszeichen "(...)" nur bei NOTE-TAGs
-- Jahrgangsspalten pro DATE-Struktur (<Spaltenname>.JAHRGANG)
+Fixes:
+- HUSB/WIFE werden immer erfasst, unabhängig von der Position im FAM-Datensatz
+- Untertags werden nur verarbeitet, wenn sie zum gesuchten L1-TAG (z.B. MARR) gehören
+- CHAN.DATE wird ignoriert, MARR.DATE bleibt korrekt
+- Jahrgangsberechnung funktioniert wieder
 """
 
 import csv
@@ -52,10 +52,10 @@ def gedcom_explorer(
     akt_l1_tag = None
     akt_untertagswerte = {}
     fortfuehrung_text_tags = set()
-    prev_tags = ["", "", ""]
     letzte_struktur = ""
     in_gueltigem_block = False
     aktueller_l1_tag = ""
+    parent_l1_tag = ""
     husb = ""
     wife = ""
 
@@ -106,6 +106,7 @@ def gedcom_explorer(
             datensatz_typ = ""
             akt_l1_tag = None
             aktueller_l1_tag = ""
+            parent_l1_tag = ""
             in_gueltigem_block = False
             husb = ""
             wife = ""
@@ -123,22 +124,40 @@ def gedcom_explorer(
 
         # L1-TAG
         if ebene == "1":
+            parent_l1_tag = tag  # Eltern-L1-TAG für Untertags merken
+
+            # HUSB/WIFE immer erfassen – unabhängig vom Haupttag
             if tag == "HUSB":
                 husb = wert.strip("@")
-                continue
-                
-            elif tag == "WIFE":
-                wife = wert.strip("@")
+
+                # alle bisherigen Einträge dieses Datensatzes nachträglich aktualisieren
+                for e in eintraege:
+                    if e.get("ID") == datensatz_id and e.get("Typ") == datensatz_typ:
+                        e["HUSB"] = husb
                 continue
 
-            flush_eintrag()
-            akt_untertagswerte = {}
-            fortfuehrung_text_tags = set()
-            aktueller_l1_tag = tag
-            akt_l1_tag = wert.strip("@") if re.match(r"^@[^@]+@$", wert) else wert
+            if tag == "WIFE":
+                wife = wert.strip("@")
+
+                # alle bisherigen Einträge dieses Datensatzes nachträglich aktualisieren
+                for e in eintraege:
+                    if e.get("ID") == datensatz_id and e.get("Typ") == datensatz_typ:
+                        e["WIFE"] = wife
+                continue
+
+            # Nur wenn der L1-TAG der gesuchte Haupttag ist (z.B. MARR)
+            if tag == l1_tag:
+                flush_eintrag()
+                akt_untertagswerte = {}
+                fortfuehrung_text_tags = set()
+                aktueller_l1_tag = tag
+                akt_l1_tag = wert.strip("@") if re.match(r"^@[^@]+@$", wert) else wert
+
+            # andere L1-TAGs (SOUR, CHAN, NOTE, ...) NICHT aktueller_l1_tag ändern
             continue
 
-        # Nur Untertags des gewählten L1-TAGs
+
+        # Nur Untertags des gewählten L1-TAGs (MARR)
         if aktueller_l1_tag != l1_tag:
             continue
 
@@ -158,12 +177,12 @@ def gedcom_explorer(
 
         # L2–L4 Untertags
         if ebene in ["2", "3", "4"]:
-            index = int(ebene) - 2
-            if index < len(prev_tags):
-                prev_tags[index] = tag
+            # Untertags müssen zum gesuchten L1-TAG gehören (Eltern-L1 = MARR)
+            if parent_l1_tag != l1_tag:
+                continue
 
-            strukturteile = prev_tags[:index] + [tag]
-            struktur = ".".join(filter(None, strukturteile))
+            # Struktur direkt aus Untertag (für FAM/MARR: DATE, PLAC, TYPE)
+            struktur = tag
 
             if struktur in untertags_katalog:
                 spaltenname = untertags_katalog[struktur]

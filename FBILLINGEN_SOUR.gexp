@@ -1,0 +1,14 @@
+{
+  "gedcom_datei": "C:/Users/dieec/Documents/pyEntwicklung/gedcom_explorer/FBILLINGEN.ged",
+  "haupttag": "SOUR",
+  "untertags": {
+    "DATA": "DATA",
+    "DATA.TEXT": "DATA.TEXT",
+    "PAGE": "PAGE",
+    "QUAY": "QUAY",
+    "WWW": "WWW"
+  },
+  "jahrgang_flag": true,
+  "cont_preview_length": 0,
+  "cont_separator": " "
+}
